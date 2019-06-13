@@ -1,0 +1,25 @@
+version: '3.7'
+services:
+  waf:
+    build:
+     context: Dockerfiles
+     dockerfile: Dockerfile
+    image: mvilche/modsecurity:centos7-v3.1.0
+    environment:
+     - SERVERNAME=app.local
+     - PROXY_IP=10.42.105.51
+     - PROXY_PORT=8009
+     - PROTOCOL_PROXY=ajp
+     - MODSECURITY_STATUS=On
+    ports:
+     - "8443:8443"
+    networks:
+     - integracion
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "1"
+
+networks:
+  integracion:

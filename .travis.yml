@@ -1,0 +1,10 @@
+language: ruby
+
+services:
+  - docker
+
+
+before_install:
+  - sh compilarProyecto.sh
+  - docker-compose up
+
