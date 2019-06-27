@@ -20,8 +20,11 @@ COPY run.sh /usr/bin/
 COPY seguridad.conf /etc/httpd/conf.d/
 COPY sitio.conf /etc/httpd/conf.d/
 COPY ErrorPages /var/www/html/ErrorPages
-RUN touch /var/log/httpd/modsec_audit.log && chown apache:apache -R /etc/httpd/certificados /var/log/httpd /usr/share/httpd /var/run/httpd /var/lib/mod_security /var/www/html && \
-ln -sf /dev/stdout /var/log/httpd/modsec_audit.log
+RUN touch /var/log/httpd/modsec_audit.log && \
+usermod -aG root apache && chown apache:apache -R /etc/httpd/certificados /var/log/httpd /usr/share/httpd /var/run/httpd /var/lib/mod_security /var/www/html && \
+ln -sf /dev/stdout /var/log/httpd/modsec_audit.log && \
+chgrp -R 0 /etc/httpd/certificados /var/log/httpd /usr/share/httpd /var/run/httpd /var/lib/mod_security /var/www/html && \
+chmod -R g=u /etc/httpd/certificados /var/log/httpd /usr/share/httpd /var/run/httpd /var/lib/mod_security /var/www/html 
 EXPOSE 8080 8443
 USER apache
 VOLUME ["/var/log/httpd"]
