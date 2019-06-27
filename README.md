@@ -4,13 +4,22 @@
 #### ARQUITECTURA:
 
   - APACHE +  WAF MODSECURITY CORE RULE 3
-  - DOCKER-COMPOSE
-  - DOCKER CE
+  - OPENSHIFT READY!
 
 
 ## INSTALACIÓN
 
-Iniciar
+
+Openshift
+
+```sh
+$ oc new-app --name=waf https://github.com/mvilche/modsecurity.git --context-dir=Dockerfiles -e SERVERNAME=test.com.uy -e PROXY_PORT=8080 -e PROXY_IP=backend -e PROTOCOL_PROXY=http -e MODSECURITY_STATUS=On
+
+```
+
+
+
+Iniciar Docker compose
 
 ```sh
 $ docker-compose up
@@ -51,14 +60,13 @@ PROXY_PORT: Puerto del servidor de aplicaciones a utilizar
 
 SERVERNAME: Dominio por el cual se accederá al WAF
 
+PROTOCOL_PROXY: Protocolo de comunicación
+
 MODSECURITY_STATUS: Estado de modsecurity, los valores posibles son:
 
 On (Activado)
 DetectionOnly (Detecta ataques pero no bloquea)
 Off (Desactivado)
-
-SSL_MAP_PORT: Protocolo utilizado para la configuracion el proxy (soportados http y ajp)
-
 
 AL INICIAR EL SERVICIO SE GENERA EL CERTIFICADO DE ACUERDO AL SERVERNAME INGRESADO
 
