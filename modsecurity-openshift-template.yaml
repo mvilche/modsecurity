@@ -55,6 +55,17 @@
         spec:
           containers:
             - image: "${APP_NAME}:latest"
+              env:
+                - name: SERVERNAME
+                  value: ${SERVERNAME}
+                - name: PROXY_IP
+                  value: ${PROXY_IP}
+                - name: PROXY_PORT
+                  value: ${PROXY_PORT}
+                - name: PROTOCOL_PROXY
+                  value: ${PROTOCOL_PROXY}
+                - name: MODSECURITY_STATUS
+                  value: ${MODSECURITY_STATUS}   
               imagePullPolicy: Always
               name: ${APP_NAME}
               ports:
@@ -154,6 +165,7 @@
         app: ${APP_NAME}
       name: ${APP_NAME}
     spec:
+      host: ${SERVERNAME}
       port:
         targetPort: https
       tls:
@@ -182,3 +194,23 @@
       displayName: Nombre del deployment
       value: 'modsecurity'
       required: true
+    - name: SERVERNAME
+      displayName: Nombre del dominio
+      value: ''
+      required: true
+    - name: PROXY_IP
+      displayName: Ip o nombre del servicio del servidor backend
+      value: ''
+      required: true
+    - name: PROXY_PORT
+      displayName: Puerto del servidor backend
+      value: ''
+      required: true                  
+    - name: PROTOCOL_PROXY
+      displayName: Protocolo de comunicación con el backend (ajp, http, https)
+      value: ''
+      required: true
+    - name: MODSECURITY_STATUS
+      displayName: Estado de modsecurity (On, Off, DetectionOnly)
+      value: ''
+      required: true  
