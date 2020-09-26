@@ -6,8 +6,8 @@ services:
      dockerfile: Dockerfile.centos8
     image: mvilche/modsecurity:centos8-v3.3.0
     environment:
-     - SERVERNAME=redash.local
-     - PROXY_IP=66.113.163.35
+     - SERVERNAME=domain.example
+     - PROXY_IP=127.0.0.1
      - PROXY_PORT=80
      - PROTOCOL_PROXY=http
      - MODSECURITY_STATUS=On
