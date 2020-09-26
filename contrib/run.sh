@@ -5,7 +5,7 @@ set -e
 echo "··························································································"
 echo "MARTIN VILCHE"
 echo "··························································································"
-CERTIFICADO=$(openssl x509 -noout -subject -in /etc/httpd/certificados/sitio.crt)
+CERTIFICADO=$(openssl x509 -noout -subject -in /etc/httpd/certs/site.crt)
 VARIABLE_OBTENIDA="subject= /C=UY/ST=UY/L=UY/O=WAF/OU=WAF/CN=$SERVERNAME"
 
 if [ ! -f /var/log/httpd/modsec_audit.log ]; then
@@ -60,7 +60,7 @@ echo "·····································
 echo "GENERANDO CERTIFICADO PARA EL SERVERNAME INGRESADO"
 echo "··························································································"
 rm -rf /etc/httpd/certificados/* && \
-openssl req -x509 -sha256 -newkey rsa:4060 -keyout /etc/httpd/certificados/sitio.key -out /etc/httpd/certificados/sitio.crt -days 1024 -nodes -subj "/C=UY/ST=UY/L=UY/O=WAF/OU=WAF/CN=$SERVERNAME"
+openssl req -x509 -sha256 -newkey rsa:4060 -keyout /etc/httpd/certs/site.key -out /etc/httpd/certs/site.crt -days 1024 -nodes -subj "/C=UY/ST=UY/L=UY/O=WAF/OU=WAF/CN=$SERVERNAME" &> /dev/null
 echo "··························································································"
 echo "CERTIFICADO GENERADO, EL ACCESO AL SITIO ES https://$SERVERNAME:8443"
 echo "8443 ES EL PUERTO POR DEFECTO. SI UTILIZA UN MAPEO DE PUERTOS, CAMBIELO POR EL ELEGIDO."
