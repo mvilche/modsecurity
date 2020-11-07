@@ -6,7 +6,7 @@ ENV LANG=es_ES.UTF-8 \
 MODSECURITY_URL=https://github.com/coreruleset/coreruleset.git \
 MODSECURITY_VERSION=v3.3.0
 
-RUN yum install epel-release -y && yum update -y && yum install httpd mod_ssl git openssl mod_security mod_security_crs -y
+RUN yum install epel-release -y && yum update -y && yum install httpd mod_ssl mod_proxy_html git openssl mod_security mod_security_crs -y
 
 RUN mkdir /etc/httpd/certs && \
 sed -i -e "s/^Listen 80/Listen 8080/" /etc/httpd/conf/httpd.conf && \
