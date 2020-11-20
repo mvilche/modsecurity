@@ -68,6 +68,10 @@
                   value: ${MODSECURITY_STATUS}   
               imagePullPolicy: Always
               name: ${APP_NAME}
+              volumeMounts:
+                - mountPath: /etc/httpd/conf.d/site.conf
+                  name: configmap-1
+                  subPath: site.conf
               ports:
                 - containerPort: 8080
                   protocol: TCP
@@ -85,6 +89,14 @@
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
           dnsPolicy: ClusterFirst
+          volumes:
+            - configMap:
+                defaultMode: 420
+                items:
+                  - key: site.conf
+                    path: site.conf
+                name: waf
+              name: configmap-1
           restartPolicy: Always
           schedulerName: default-scheduler
           terminationGracePeriodSeconds: 30
@@ -120,14 +132,14 @@
       resources: {}
       runPolicy: Serial
       source:
-        contextDir: Dockerfiles
+        contextDir: contrib
         git:
           ref: master
           uri: 'https://github.com/mvilche/modsecurity.git'
         type: Git
       strategy:
         dockerStrategy:
-          dockerfilePath: Dockerfile
+          dockerfilePath: Dockerfile.centos8
         type: Docker
       successfulBuildsHistoryLimit: 5
       triggers:
@@ -186,7 +198,109 @@
       name: ${APP_NAME}
     spec: {}
 
+
+  - apiVersion: v1
+    data:
+      standalone.conf: |-
+        <VirtualHost *:8080>
+        ServerName ${SERVERNAME}
+        RewriteEngine On
+        RewriteCond %{HTTPS} !=on
+        RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
+
+        </VirtualHost>
+        <VirtualHost *:8443>
+        ServerName ${SERVERNAME}
+
+        ErrorLogFormat          "[%{cu}t] [%-m:%-l] %-a %-L %M"
+        LogFormat "%h %{GEOIP_COUNTRY_CODE}e %u [%{%Y-%m-%d %H:%M:%S}t.%{usec_frac}t] \"%r\" %>s %b \
+        \"%{Referer}i\" \"%{User-Agent}i\" %v %A %p %R %{BALANCER_WORKER_ROUTE}e %X \"%{cookie}n\" \
+        %{UNIQUE_ID}e %{SSL_PROTOCOL}x %{SSL_CIPHER}x %I %O %{ratio}n%% \
+        %D %{ModSecTimeIn}e %{ApplicationTime}e %{ModSecTimeOut}e \
+        %{ModSecAnomalyScoreIn}e %{ModSecAnomalyScoreOut}e" extended
+
+        LogFormat "[%{%Y-%m-%d %H:%M:%S}t.%{usec_frac}t] %{UNIQUE_ID}e %D \
+        PerfModSecInbound: %{TX.perf_modsecinbound}M \
+        PerfAppl: %{TX.perf_application}M \
+        PerfModSecOutbound: %{TX.perf_modsecoutbound}M \
+        TS-Phase1: %{TX.ModSecTimestamp1start}M-%{TX.ModSecTimestamp1end}M \
+        TS-Phase2: %{TX.ModSecTimestamp2start}M-%{TX.ModSecTimestamp2end}M \
+        TS-Phase3: %{TX.ModSecTimestamp3start}M-%{TX.ModSecTimestamp3end}M \
+        TS-Phase4: %{TX.ModSecTimestamp4start}M-%{TX.ModSecTimestamp4end}M \
+        TS-Phase5: %{TX.ModSecTimestamp5start}M-%{TX.ModSecTimestamp5end}M \
+        Perf-Phase1: %{PERF_PHASE1}M \
+        Perf-Phase2: %{PERF_PHASE2}M \
+        Perf-Phase3: %{PERF_PHASE3}M \
+        Perf-Phase4: %{PERF_PHASE4}M \
+        Perf-Phase5: %{PERF_PHASE5}M \
+        Perf-ReadingStorage: %{PERF_SREAD}M \
+        Perf-WritingStorage: %{PERF_SWRITE}M \
+        Perf-GarbageCollection: %{PERF_GC}M \
+        Perf-ModSecLogging: %{PERF_LOGGING}M \
+        Perf-ModSecCombined: %{PERF_COMBINED}M" perflog
+
+        LogLevel                      warn
+        ErrorLog                      logs/site_error.log
+        CustomLog                     logs/site_access.log extended
+        CustomLog                     logs/modsec-perf.log perflog env=write_perflog
+
+        SSLEngine on
+        SSLCertificateFile certs/site.crt
+        SSLCertificateKeyFile certs/site.key
+
+
+        DocumentRoot "/var/www/html/"
+        ProxyPass /ErrorPages/ !
+        ErrorDocument 400 /ErrorPages/HTTP400.html
+        ErrorDocument 401 /ErrorPages/HTTP401.html
+        ErrorDocument 403 /ErrorPages/HTTP403.html
+        ErrorDocument 404 /ErrorPages/HTTP404.html
+        ErrorDocument 500 /ErrorPages/HTTP500.html
+        ErrorDocument 501 /ErrorPages/HTTP501.html
+        ErrorDocument 502 /ErrorPages/HTTP502.html
+        ErrorDocument 503 /ErrorPages/HTTP503.html
+
+
+        #### CONFIGURACION PROXY REVERSE
+        ProxyPass / ${PROTOCOL_PROXY}://${PROXY_IP}:${PROXY_PORT}/
+        ProxyPassReverse / ${PROTOCOL_PROXY}://${PROXY_IP}:${PROXY_PORT}/
+        ProxyPreserveHost On
+        ProxyRequests Off
+        RequestHeader set X-Forwarded-Proto "https"
+        ####
+
+
+        Header set Content-Security-Policy: "upgrade-insecure-requests;"
+        TraceEnable off
+        FileETag None
+        Header edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure;SameSite=strict
+        Header set X-XSS-Protection 1;mode=block
+        Header set X-Content-Type-Options nosniff
+        Header set X-Robots-Tag: none
+        Header set X-Frame-Options: SAMEORIGIN
+        Header set Cache-Control: "no-cache, no-store, must-revalidate"
+        Header set Pragma: no-cache
+        Header always unset "X-Powered-By"
+        Header unset "X-Powered-By"
+        Header unset "Etag"
+        RewriteEngine On
+        RewriteCond %{THE_REQUEST} !HTTP/1.1$
+        RewriteRule .* - [F]
+
+
+        <IfModule mod_security2.c>
+        SecRuleEngine ${MODSECURITY_STATUS}
+        SecStatusEngine On
+        </IfModule>
+
+        </VirtualHost>       
+    kind: ConfigMap
+    metadata:
+      name: ${APP_NAME}-config
+
 ######
+
+
 
 
   parameters:
