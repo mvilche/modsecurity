@@ -3,13 +3,13 @@ services:
   waf:
     build:
      context: contrib
-     dockerfile: Dockerfile.centos8
-    image: mvilche/modsecurity:centos8-v3.3.0
+     dockerfile: Dockerfile.fedora33
+    image: mvilche/modsecurity:fedora33-v3.3.0
     environment:
-     - SERVERNAME=domain.example
-     - PROXY_IP=127.0.0.1
+     - SERVERNAME=git.sofis.lat
+     - PROXY_IP=192.168.121.146
      - PROXY_PORT=80
      - PROTOCOL_PROXY=http
      - MODSECURITY_STATUS=On
     ports:
-     - "8443:8443"
+     - "443:8443"

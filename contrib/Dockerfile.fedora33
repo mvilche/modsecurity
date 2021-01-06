@@ -6,7 +6,7 @@ ENV LANG=es_ES.UTF-8 \
 MODSECURITY_URL=https://github.com/coreruleset/coreruleset.git \
 MODSECURITY_VERSION=v3.3.0
 
-RUN dnf install epel-release -y && dnf update -y && dnf install httpd mod_ssl mod_proxy_html git openssl mod_security mod_security_crs -y
+RUN dnf update -y && dnf install httpd mod_ssl mod_proxy_html git openssl mod_security mod_security_crs -y
 
 RUN mkdir /etc/httpd/certs && \
 sed -i -e "s/^Listen 80/Listen 8080/" /etc/httpd/conf/httpd.conf && \
