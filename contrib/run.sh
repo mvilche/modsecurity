@@ -2,9 +2,6 @@
 
 set -e
 
-echo "··························································································"
-echo "MARTIN VILCHE"
-echo "··························································································"
 CERTIFICADO=$(openssl x509 -noout -subject -in /etc/httpd/certs/site.crt)
 VARIABLE_OBTENIDA="subject= /C=UY/ST=UY/L=UY/O=WAF/OU=WAF/CN=$SERVERNAME"
 
