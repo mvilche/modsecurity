@@ -6,8 +6,8 @@ services:
      dockerfile: Dockerfile.fedora33
     image: mvilche/modsecurity:fedora33-v3.3.0
     environment:
-     - SERVERNAME=git.sofis.lat
-     - PROXY_IP=192.168.121.146
+     - SERVERNAME=sitio.com.uy
+     - PROXY_IP=ablepharuslit.myspecies.info
      - PROXY_PORT=80
      - PROTOCOL_PROXY=http
      - MODSECURITY_STATUS=On
