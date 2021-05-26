@@ -2,8 +2,8 @@
 
 set -e
 
-CERTIFICADO=$(openssl x509 -noout -subject -in /etc/httpd/certs/site.crt)
-VARIABLE_OBTENIDA="subject= /C=UY/ST=UY/L=UY/O=WAF/OU=WAF/CN=$SERVERNAME"
+CERTIFICADO=$(openssl x509 -noout -subject -in /etc/httpd/certs/site.crt | awk -F= '{print $NF}' | sed -e 's/^[ \t]*//')
+VARIABLE_OBTENIDA="$SERVERNAME"
 
 if [ ! -f /var/log/httpd/modsec_audit.log ]; then
 touch /var/log/httpd/modsec_audit.log
@@ -56,7 +56,6 @@ else
 echo "··························································································"
 echo "GENERANDO CERTIFICADO PARA EL SERVERNAME INGRESADO"
 echo "··························································································"
-rm -rf /etc/httpd/certificados/* && \
 openssl req -x509 -sha256 -newkey rsa:4060 -keyout /etc/httpd/certs/site.key -out /etc/httpd/certs/site.crt -days 1024 -nodes -subj "/C=UY/ST=UY/L=UY/O=WAF/OU=WAF/CN=$SERVERNAME" &> /dev/null
 echo "··························································································"
 echo "CERTIFICADO GENERADO, EL ACCESO AL SITIO ES https://$SERVERNAME:8443"
